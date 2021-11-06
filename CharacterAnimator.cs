@@ -23,7 +23,7 @@ public class CharacterAnimator : MonoBehaviour
     Matrix4x4 RotateTowardsVector(Vector3 v)
     {
         Vector3 u = Vector3.Normalize(v);
-        float anglex = Mathf.Atan2(u[1], u[2]);
+        float anglex = Mathf.Atan2(u[1], u[2]); //convert to degrees
         float thetax = 90 - anglex;
         Matrix4x4 rx = MatrixUtils.RotateX(-thetax);
         Matrix4x4 rxInv = rx.inverse;
@@ -47,32 +47,13 @@ public class CharacterAnimator : MonoBehaviour
     GameObject CreateCylinderBetweenPoints(Vector3 p1, Vector3 p2, float diameter)
     {
         GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        Matrix4x4 t = MatrixUtils.Translate(new Vector4(0.5f * (p1[0] + p2[0]), 0.5f * (p1[1] + p2[1]), 0.5f * (p1[2] + p2[2]),1));
-        //Matrix4x4 t = MatrixUtils.Translate(new vector4(p1[0], p1[1], p1[2], 1));
-        //Matrix4x4 t = MatrixUtils.Translate(p1);
-        Matrix4x4 r = MatrixUtils.RotateTowardsVector(p2-p1);
-        float a = diameter;
-        float b = diameter;
-        float c = diameter;
-        float d = diameter;
-        //if (p1[0] != p2[0])
-        //{
-        //    a = Mathf.Abs(p1[0] - p2[0]);
-        //}
-        //if (p1[1] != p2[1])
-        //{
-        //    b = Mathf.Abs(p1[1] - p2[1]);
-        //}
-        //if (p1[2] != p2[2])
-        //{
-        //    c = Mathf.Abs(p1[2] - p2[2]);
-        //}
 
-        Matrix4x4 s2 = MatrixUtils.Scale(new Vector3(0.5f, 0.5f, 0.5f));
-        Matrix4x4 s1 = MatrixUtils.Scale(new Vector4(Mathf.Abs(p1[0] - p2[0]), Mathf.Abs(p1[1] - p2[1]), Mathf.Abs(p1[2] - p2[2]), diameter));
-        MatrixUtils.ApplyTransform(cylinder, t*r*s1);
+        Matrix4x4 t = MatrixUtils.Translate(new Vector3(0.5f * (p1[0] + p2[0]), 0.5f * (p1[1] + p2[1]), 0.5f * (p1[2] + p2[2])));
+        Matrix4x4 r = MatrixUtils.RotateTowardsVector(p2-p1);
+        Matrix4x4 s = MatrixUtils.Scale(new Vector3(diameter, Vector3.Distance(p1, p2)/2, diameter));
+        MatrixUtils.ApplyTransform(cylinder, t*r*s);
         return cylinder;
-        //return null;
+        
     }
 
     // Creates a GameObject representing a given BVHJoint and recursively creates GameObjects for it's child joints
