@@ -12,6 +12,15 @@ public class CharacterAnimator : MonoBehaviour
 	private int currFrame = 0; // Current frame of the animation
 
 	private float timer = 0.0f;
+    private const float MULTIPLE_90= 90;
+	private const float CONST = 0.5f;
+	private const string HEAD_JOINT = "Head";
+	private const int HEAD_SCALE = 8;
+	private const int JOINT_SCALE = 2;
+	private const int DEFAULT_VALUE = 0;
+	private const int X_CORD = 0;
+	private const int Y_CORD = 1;
+	private const int Z_CORD = 2;
 
 	// Start is called before the first frame update
 	void Start()
@@ -26,18 +35,15 @@ public class CharacterAnimator : MonoBehaviour
 	Matrix4x4 RotateTowardsVector(Vector3 v)
 	{
 		Vector3 u = Vector3.Normalize(v);
-		float anglex = (Mathf.Atan2(u[1], u[2]))*Mathf.Rad2Deg; //convert to degrees
-		float thetax = 90 - anglex;
+		float anglex = (Mathf.Atan2(u[Y_CORD], u[Z_CORD]))*Mathf.Rad2Deg; //converts to degrees
+		float thetax = MULTIPLE_90- anglex;
 		Matrix4x4 rx = MatrixUtils.RotateX(-thetax);
         Matrix4x4 rxInv = rx.inverse;
 
-        float anglez = (Mathf.Atan2(Mathf.Sqrt(Mathf.Pow(u[1],2) +Mathf.Pow( u[2],2)), u[0]))*Mathf.Rad2Deg;
-		float thetaz = 90 - anglez;
+        float anglez = (Mathf.Atan2(Mathf.Sqrt(Mathf.Pow(u[Y_CORD],2) +Mathf.Pow( u[Z_CORD],2)), u[X_CORD]))*Mathf.Rad2Deg;
+		float thetaz = MULTIPLE_90 - anglez;
 		Matrix4x4 rz = MatrixUtils.RotateZ(thetaz);
         Matrix4x4 rzInv = rz.inverse;
-
-        //Vector3 up = new Vector3(0, 1, 0);
-        //print((rxInv * rzInv).MultiplyVector(up)==u);
 
 
         return  rxInv * rzInv;
@@ -48,9 +54,9 @@ public class CharacterAnimator : MonoBehaviour
 	{
 		GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
 
-		Matrix4x4 t = MatrixUtils.Translate(new Vector3(0.5f * (p1[0] + p2[0]), 0.5f * (p1[1] + p2[1]), 0.5f * (p1[2] + p2[2])));
+		Matrix4x4 t = MatrixUtils.Translate(new Vector3(CONST * (p1[X_CORD] + p2[X_CORD]), CONST * (p1[Y_CORD] + p2[Y_CORD]), CONST* (p1[Z_CORD] + p2[Z_CORD])));
 		Matrix4x4 r = RotateTowardsVector(p2-p1);
-		Matrix4x4 s = MatrixUtils.Scale(new Vector3(diameter, Vector3.Distance(p1, p2)/2, diameter));
+		Matrix4x4 s = MatrixUtils.Scale(new Vector3(diameter, Vector3.Distance(p1, p2)*CONST, diameter));
 		MatrixUtils.ApplyTransform(cylinder, t*r*s);
 		return cylinder;
 		
@@ -64,20 +70,17 @@ public class CharacterAnimator : MonoBehaviour
 		sphere.transform.parent = joint.gameObject.transform;
 		Matrix4x4 s;
 		Matrix4x4 t = MatrixUtils.Translate(parentPosition + joint.offset);
-		if (joint.name == "Head")
+		if (joint.name == HEAD_JOINT)
 		{
-			s = MatrixUtils.Scale(new Vector3(8, 8, 8));
-
-
+			s = MatrixUtils.Scale(new Vector3(HEAD_SCALE, HEAD_SCALE, HEAD_SCALE));
 		}
 		else
 		{
-			s = MatrixUtils.Scale(new Vector3(2, 2, 2));
+			s = MatrixUtils.Scale(new Vector3(JOINT_SCALE, JOINT_SCALE, JOINT_SCALE));
 
 		}
 		MatrixUtils.ApplyTransform(sphere, s);
 		MatrixUtils.ApplyTransform(joint.gameObject, t);
-		float diameter = 0.5f;
 		
 	   
 
@@ -87,9 +90,8 @@ public class CharacterAnimator : MonoBehaviour
 			{
 
 				CreateJoint(item, parentPosition + joint.offset);
-				GameObject bone = CreateCylinderBetweenPoints(parentPosition + joint.offset, joint.offset + parentPosition+item.offset, diameter);
+				GameObject bone = CreateCylinderBetweenPoints(parentPosition + joint.offset, joint.offset + parentPosition+item.offset, CONST);
 				bone.transform.parent = joint.gameObject.transform;
-				Debug.DrawLine(parentPosition + joint.offset, joint.offset + parentPosition + item.offset, Color.red, 30, false);
 			}
 		}
 
@@ -119,7 +121,7 @@ public class CharacterAnimator : MonoBehaviour
 		}
 		else
 		{
-			t = MatrixUtils.Translate(new Vector3(joint.offset[0],joint.offset[1],joint.offset[2]));
+			t = MatrixUtils.Translate(new Vector3(joint.offset[X_CORD],joint.offset[Y_CORD],joint.offset[Z_CORD]));
 		}
         List<Matrix4x4> ordered_rotations = new List<Matrix4x4> {Matrix4x4.identity, Matrix4x4.identity, Matrix4x4.identity };
 		ordered_rotations[joint.rotationOrder.x] = rx;
@@ -165,9 +167,9 @@ public class CharacterAnimator : MonoBehaviour
 				}
 				else
 				{
-					currFrame = 0;
+					currFrame = DEFAULT_VALUE;
 				}
-				timer = 0;
+				timer = DEFAULT_VALUE;
 
 			}
 			timer = timer + Time.deltaTime;
