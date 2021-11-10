@@ -53,9 +53,10 @@ public class CharacterAnimator : MonoBehaviour
 	GameObject CreateCylinderBetweenPoints(Vector3 p1, Vector3 p2, float diameter)
 	{
 		GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-
+		// we tanslate the bone right in the middle of two joints
 		Matrix4x4 t = MatrixUtils.Translate(new Vector3(CONST * (p1[X_CORD] + p2[X_CORD]), CONST * (p1[Y_CORD] + p2[Y_CORD]), CONST* (p1[Z_CORD] + p2[Z_CORD])));
 		Matrix4x4 r = RotateTowardsVector(p2-p1);
+		//the bone length is the distance between p1 and p2 and 1\const is the default height
 		Matrix4x4 s = MatrixUtils.Scale(new Vector3(diameter, Vector3.Distance(p1, p2)*CONST, diameter));
 		MatrixUtils.ApplyTransform(cylinder, t*r*s);
 		return cylinder;
@@ -114,15 +115,15 @@ public class CharacterAnimator : MonoBehaviour
 		Matrix4x4 t;
 
 		if (joint == data.rootJoint)
-
 		{
-			
 			t = MatrixUtils.Translate(new Vector3(keyframe[joint.positionChannels.x], keyframe[joint.positionChannels.y], keyframe[joint.positionChannels.z]));
 		}
 		else
 		{
 			t = MatrixUtils.Translate(new Vector3(joint.offset[X_CORD],joint.offset[Y_CORD],joint.offset[Z_CORD]));
 		}
+
+		//creates a list of matrices and adds the rotation matrices according to the given order and then we multiply them from left to right
         List<Matrix4x4> ordered_rotations = new List<Matrix4x4> {Matrix4x4.identity, Matrix4x4.identity, Matrix4x4.identity };
 		ordered_rotations[joint.rotationOrder.x] = rx;
         ordered_rotations[joint.rotationOrder.y] = ry;
@@ -130,7 +131,7 @@ public class CharacterAnimator : MonoBehaviour
 
         Matrix4x4 r = ordered_rotations[0] * ordered_rotations[1] * ordered_rotations[2];
         
-        
+        // scale is not needed S=I4
 		Matrix4x4 local_M = t*r;
 		Matrix4x4 global_M = parentTransform * local_M;
 		MatrixUtils.ApplyTransform(joint.gameObject, global_M );
@@ -143,11 +144,6 @@ public class CharacterAnimator : MonoBehaviour
 				TransformJoint(item, global_M, keyframe);
 			}
 		}
-
-
-
-
-
 	}
 
 	// Update is called once per frame
