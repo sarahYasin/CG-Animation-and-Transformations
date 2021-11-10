@@ -11,6 +11,8 @@ public class CharacterAnimator : MonoBehaviour
 	private BVHData data; // BVH data of the BVHFile will be loaded here
 	private int currFrame = 0; // Current frame of the animation
 
+	private float timer = 0.0f;
+
 	// Start is called before the first frame update
 	void Start()
 	{
@@ -57,8 +59,7 @@ public class CharacterAnimator : MonoBehaviour
 	// Creates a GameObject representing a given BVHJoint and recursively creates GameObjects for it's child joints
 	GameObject CreateJoint(BVHJoint joint, Vector3 parentPosition)
 	{
-		GameObject g = new GameObject(joint.name);
-		joint.gameObject = g;
+		joint.gameObject = new GameObject(joint.name);
 		GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 		sphere.transform.parent = joint.gameObject.transform;
 		Matrix4x4 s;
@@ -74,7 +75,8 @@ public class CharacterAnimator : MonoBehaviour
 			s = MatrixUtils.Scale(new Vector3(2, 2, 2));
 
 		}
-		MatrixUtils.ApplyTransform(joint.gameObject, t * s);
+		MatrixUtils.ApplyTransform(sphere, s);
+		MatrixUtils.ApplyTransform(joint.gameObject, t);
 		float diameter = 0.5f;
 		
 	   
@@ -91,13 +93,59 @@ public class CharacterAnimator : MonoBehaviour
 			}
 		}
 
-		return g;
+		return joint.gameObject;
 	}
+
+
 
 	// Transforms BVHJoint according to the keyframe channel data, and recursively transforms its children
 	private void TransformJoint(BVHJoint joint, Matrix4x4 parentTransform, float[] keyframe)
 	{
-		// Your code here
+
+		int rxc = joint.rotationChannels.x;
+		int ryc = joint.rotationChannels.y;
+		int rzc = joint.rotationChannels.z;
+
+		Matrix4x4 rx = MatrixUtils.RotateX(keyframe[rxc]);
+		Matrix4x4 ry = MatrixUtils.RotateY(keyframe[ryc]);
+		Matrix4x4 rz = MatrixUtils.RotateZ(keyframe[rzc]);
+		Matrix4x4 t;
+
+		if (joint == data.rootJoint)
+
+		{
+			
+			t = MatrixUtils.Translate(new Vector3(keyframe[joint.positionChannels.x], keyframe[joint.positionChannels.y], keyframe[joint.positionChannels.z]));
+		}
+		else
+		{
+			t = MatrixUtils.Translate(new Vector3(joint.offset[0],joint.offset[1],joint.offset[2]));
+		}
+        List<Matrix4x4> ordered_rotations = new List<Matrix4x4> {Matrix4x4.identity, Matrix4x4.identity, Matrix4x4.identity };
+		ordered_rotations[joint.rotationOrder.x] = rx;
+        ordered_rotations[joint.rotationOrder.y] = ry;
+        ordered_rotations[joint.rotationOrder.z] = rz;
+
+        Matrix4x4 r = ordered_rotations[0] * ordered_rotations[1] * ordered_rotations[2];
+        
+        
+		Matrix4x4 local_M = t*r;
+		Matrix4x4 global_M = parentTransform * local_M;
+		MatrixUtils.ApplyTransform(joint.gameObject, global_M );
+
+		if (!joint.isEndSite)
+		{
+			foreach (BVHJoint item in joint.children)
+			{
+
+				TransformJoint(item, global_M, keyframe);
+			}
+		}
+
+
+
+
+
 	}
 
 	// Update is called once per frame
@@ -105,7 +153,25 @@ public class CharacterAnimator : MonoBehaviour
 	{
 		if (animate)
 		{
-			// Your code here
+			if (timer >= data.frameLength)
+			{
+				if (currFrame < data.numFrames - 1)
+
+				{
+
+					TransformJoint(data.rootJoint, Matrix4x4.identity, data.keyframes[currFrame]);
+					currFrame++;
+
+				}
+				else
+				{
+					currFrame = 0;
+				}
+				timer = 0;
+
+			}
+			timer = timer + Time.deltaTime;
+
 		}
 	}
 }
