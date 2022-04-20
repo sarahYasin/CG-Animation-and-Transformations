@@ -83,7 +83,7 @@ public class CharacterAnimator : MonoBehaviour
 		MatrixUtils.ApplyTransform(sphere, s);
 		MatrixUtils.ApplyTransform(joint.gameObject, t);
 		
-	   
+	   	//todo the root node's offset is ignored 
 
 		if (!joint.isEndSite)
 		{
