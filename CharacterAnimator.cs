@@ -83,7 +83,7 @@ public class CharacterAnimator : MonoBehaviour
 		MatrixUtils.ApplyTransform(sphere, s);
 		MatrixUtils.ApplyTransform(joint.gameObject, t);
 		
-	   	//todo the root node's offset is ignored 
+	   	
 
 		if (!joint.isEndSite)
 		{
@@ -113,7 +113,8 @@ public class CharacterAnimator : MonoBehaviour
 		Matrix4x4 ry = MatrixUtils.RotateY(keyframe[ryc]);
 		Matrix4x4 rz = MatrixUtils.RotateZ(keyframe[rzc]);
 		Matrix4x4 t;
-
+		
+		//todo the root node's offset is ignored 
 		if (joint == data.rootJoint)
 		{
 			t = MatrixUtils.Translate(new Vector3(keyframe[joint.positionChannels.x], keyframe[joint.positionChannels.y], keyframe[joint.positionChannels.z]));
@@ -135,7 +136,9 @@ public class CharacterAnimator : MonoBehaviour
 		Matrix4x4 local_M = t*r;
 		Matrix4x4 global_M = parentTransform * local_M;
 		MatrixUtils.ApplyTransform(joint.gameObject, global_M );
-
+		
+		
+		
 		if (!joint.isEndSite)
 		{
 			foreach (BVHJoint item in joint.children)
