@@ -117,7 +117,7 @@ public class CharacterAnimator : MonoBehaviour
 		//todo the root node's offset is ignored 
 		if (joint == data.rootJoint)
 		{
-			t = MatrixUtils.Translate(new Vector3(keyframe[joint.positionChannels.x], keyframe[joint.positionChannels.y], keyframe[joint.positionChannels.z]));
+			t = MatrixUtils.Translate(new Vector3(keyframe[joint.positionChannels.x]+ joint.offset[X_CORD], keyframe[joint.positionChannels.y]+ joint.offset[Y_CORD], keyframe[joint.positionChannels.z]+ joint.offset[Z_CORD]));
 		}
 		else
 		{
