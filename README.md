@@ -1,7 +1,9 @@
 # CG-Animation-and-Transformations
 
 
-an exercise in computer graphics course at HUJI 2021
+an exercise in computer graphics course at HUJI 2021 about animation, homogeneous coordinates
+and 3D transformations.
+
 partner: amro asali
 
 characterAnimator.cs draw and animate a 3D character on screen using BVH files 
