@@ -1,7 +1,8 @@
 # CG-Animation-and-Transformations
 
 
-an exercise i've done in computer graphics course at HUJI 2021
+an exercise in computer graphics course at HUJI 2021
+partner: amro asali
 
 characterAnimator.cs draw and animate a 3D character on screen using BVH files 
 
